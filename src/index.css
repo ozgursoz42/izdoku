@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.92; }
+}
+
+@keyframes trace-ripple {
+  0% { transform: scale(0.3); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+@keyframes trace-spin {
+  0% { transform: rotate(0deg) scale(0.6); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1.6); opacity: 0; }
+}
+
+@keyframes trace-burst {
+  0% { transform: scale(0.4); opacity: 1; }
+  50% { opacity: 0.9; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes line-glow {
+  0% { stroke-dashoffset: 200; opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.8; }
+}
+
+.animate-trace-ripple {
+  animation: trace-ripple 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-trace-spin {
+  animation: trace-spin 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-trace-burst {
+  animation: trace-burst 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

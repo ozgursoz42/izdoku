@@ -1,0 +1,6 @@
+{
+  "name": "İZ DOKU",
+  "description": "Sayılara gerek yok. İzleri takip et. Doğal semboller ve iz mekaniği ile akıcı bir zeka ve mantık bulmaca oyunu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
