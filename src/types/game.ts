@@ -184,6 +184,16 @@ export interface GameStats {
   isCompleted: boolean;
 }
 
+export type ThemeId =
+  | 'sand'
+  | 'dark'
+  | 'porcelain'
+  | 'forest'
+  | 'cosmic'
+  | 'ocean'
+  | 'sunset'
+  | 'bamboo';
+
 export interface UserProgress {
   unlockedLevel: number;
   completedLevels: Record<
@@ -201,5 +211,6 @@ export interface UserProgress {
     sound: boolean;
     vibration: boolean;
     highContrast: boolean;
+    theme: ThemeId;
   };
 }

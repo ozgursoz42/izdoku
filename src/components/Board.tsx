@@ -3,6 +3,7 @@ import { CellData, BoardSize } from '../types/game';
 import { SymbolIcon } from './SymbolIcon';
 import { TraceOverlay } from './TraceOverlay';
 import { TraceEffect, RegionConnection } from '../types/game';
+import { ThemeDefinition, THEMES } from '../utils/theme';
 
 interface BoardProps {
   size: BoardSize;
@@ -18,6 +19,7 @@ interface BoardProps {
     cell: { row: number; col: number };
     relatedCells: { row: number; col: number }[];
   } | null;
+  theme?: ThemeDefinition;
 }
 
 export const Board: React.FC<BoardProps> = ({
@@ -31,6 +33,7 @@ export const Board: React.FC<BoardProps> = ({
   cellSize,
   highlightedSymbolId,
   hintHighlight,
+  theme = THEMES.sand,
 }) => {
   const isSelected = (r: number, c: number) =>
     selectedCell?.row === r && selectedCell?.col === c;
@@ -57,17 +60,20 @@ export const Board: React.FC<BoardProps> = ({
 
   return (
     <div
-      className="relative mx-auto rounded-2xl p-1.5 bg-[#EFE9DF] shadow-md border border-[#E5DDD0] select-none flex items-center justify-center"
+      className="relative mx-auto rounded-2xl p-1.5 shadow-lg select-none flex items-center justify-center transition-colors duration-200"
       style={{
         width: `${totalPixelSize + 12}px`,
         height: `${totalPixelSize + 12}px`,
+        backgroundColor: theme.boardOuterBg,
+        border: `1.5px solid ${theme.boardOuterBorder}`,
       }}
     >
       <div
-        className="relative bg-[#FAF7F2] rounded-xl overflow-hidden grid"
+        className="relative rounded-xl overflow-hidden grid shadow-inner"
         style={{
           width: `${totalPixelSize}px`,
           height: `${totalPixelSize}px`,
+          backgroundColor: theme.boardInnerBg,
           gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
           gridTemplateRows: `repeat(${size}, ${cellSize}px)`,
         }}
@@ -81,32 +87,52 @@ export const Board: React.FC<BoardProps> = ({
             const hintTarget = isHintTarget(r, c);
             const hintRelated = isHintRelated(r, c);
 
-            // Region boundaries detection
+            // Region boundaries detection (strictly 3x3 square blocks on 9x9 boards)
             const hasThickBottom =
               r < size - 1 && regions[r][c] !== regions[r + 1][c];
             const hasThickRight =
               c < size - 1 && regions[r][c] !== regions[r][c + 1];
 
-            // Background color state calculation
-            let bgClass = 'bg-[#FCFBF8]';
+            // Background & ring styling based on active theme
+            const cellStyle: React.CSSProperties = {
+              width: `${cellSize}px`,
+              height: `${cellSize}px`,
+              backgroundColor: theme.cellDefaultBg,
+              borderBottom: hasThickBottom
+                ? `3px solid ${theme.cellBorderThick}`
+                : `0.75px solid ${theme.cellBorderThin}`,
+              borderRight: hasThickRight
+                ? `3px solid ${theme.cellBorderThick}`
+                : `0.75px solid ${theme.cellBorderThin}`,
+            };
+
+            let extraClasses = '';
+
             if (cell.error) {
-              bgClass = 'bg-rose-100/90 text-rose-900';
+              cellStyle.backgroundColor = theme.cellErrorBg;
+              extraClasses = 'text-rose-900';
             } else if (selected) {
-              bgClass = 'bg-amber-100/90 ring-2 ring-amber-500 z-10 shadow-inner';
+              cellStyle.backgroundColor = theme.cellSelectedBg;
+              cellStyle.boxShadow = `inset 0 0 0 2px ${theme.cellSelectedRing}`;
+              extraClasses = 'z-10';
             } else if (hintTarget) {
-              bgClass = 'bg-amber-200/90 ring-2 ring-amber-600 animate-pulse z-10';
+              cellStyle.backgroundColor = theme.cellSelectedBg;
+              cellStyle.boxShadow = `inset 0 0 0 2px ${theme.cellSelectedRing}`;
+              extraClasses = 'animate-pulse z-10';
             } else if (hintRelated) {
-              bgClass = 'bg-amber-50/90';
+              cellStyle.backgroundColor = theme.cellRelatedBg;
             } else if (matching) {
-              bgClass = 'bg-emerald-50/80 ring-1 ring-emerald-300';
+              cellStyle.backgroundColor = theme.cellMatchingBg;
+              cellStyle.boxShadow = `inset 0 0 0 1.5px ${theme.cellMatchingRing}`;
             } else if (related) {
-              bgClass = 'bg-[#F4EFE6]/70';
+              cellStyle.backgroundColor = theme.cellRelatedBg;
             } else if (cell.initial) {
-              bgClass = 'bg-[#FAF6EE]';
+              cellStyle.backgroundColor = theme.cellInitialBg;
             }
 
             // Cell symbol size scales with board dimension
-            const iconSize = size === 4 ? cellSize * 0.65 : size === 6 ? cellSize * 0.62 : cellSize * 0.58;
+            const iconSize =
+              size === 4 ? cellSize * 0.65 : size === 6 ? cellSize * 0.62 : cellSize * 0.58;
 
             return (
               <button
@@ -114,17 +140,8 @@ export const Board: React.FC<BoardProps> = ({
                 id={`board-cell-${r}-${c}`}
                 type="button"
                 onClick={() => onCellClick(r, c)}
-                className={`relative flex items-center justify-center transition-colors duration-150 focus:outline-none ${bgClass}`}
-                style={{
-                  width: `${cellSize}px`,
-                  height: `${cellSize}px`,
-                  borderBottom: hasThickBottom
-                    ? '2.5px solid #A89F91'
-                    : '0.75px solid #E8E1D5',
-                  borderRight: hasThickRight
-                    ? '2.5px solid #A89F91'
-                    : '0.75px solid #E8E1D5',
-                }}
+                className={`relative flex items-center justify-center transition-colors duration-150 focus:outline-none ${extraClasses}`}
+                style={cellStyle}
               >
                 {cell.value ? (
                   <div
@@ -136,13 +153,17 @@ export const Board: React.FC<BoardProps> = ({
                   </div>
                 ) : (
                   // Empty cell dot / subtle focal indicator
-                  <div className="w-1.5 h-1.5 rounded-full bg-stone-300/40" />
+                  <div
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: theme.cellEmptyDot }}
+                  />
                 )}
 
                 {/* Subtle initial clue dot indicator in corner */}
                 {cell.initial && (
                   <span
-                    className="absolute top-1 left-1 w-1 h-1 rounded-full bg-stone-400/60"
+                    className="absolute top-1 left-1 w-1 h-1 rounded-full opacity-60"
+                    style={{ backgroundColor: theme.textMuted }}
                     title="Başlangıç İzi"
                   />
                 )}

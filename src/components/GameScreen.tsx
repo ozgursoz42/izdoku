@@ -18,6 +18,7 @@ import { FlyingSymbolOverlay, FlyingSymbolItem } from './FlyingSymbolOverlay';
 import { HIDDEN_ARTWORKS } from '../utils/hiddenPictures';
 import { findLogicalHint, HintResult } from '../utils/sudoku';
 import { soundManager } from '../utils/audio';
+import { getTheme } from '../utils/theme';
 import { ChevronLeft, RotateCcw, AlertTriangle, Settings, Pause, Play } from 'lucide-react';
 
 interface GameScreenProps {
@@ -574,15 +575,29 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   };
 
   const bestTime = progress.completedLevels[levelConfig.id]?.bestTime ?? null;
+  const currentTheme = getTheme(progress.settings.theme);
 
   return (
-    <div className="h-screen w-full bg-[#FAF7F2] text-stone-800 flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden pb-safe">
+    <div
+      className="h-screen w-full flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden pb-safe transition-colors duration-200"
+      style={{
+        backgroundColor: currentTheme.appBg,
+        color: currentTheme.textPrimary,
+      }}
+    >
       {/* Top App Bar */}
-      <header className="flex items-center justify-between px-3 py-2 border-b border-[#E5DDD0] bg-[#FAF7F2] shrink-0">
+      <header
+        className="flex items-center justify-between px-3 py-2 border-b shrink-0 transition-colors duration-200"
+        style={{
+          backgroundColor: currentTheme.headerBg,
+          borderColor: currentTheme.headerBorder,
+        }}
+      >
         <button
           type="button"
           onClick={onBack}
-          className="p-1.5 -ml-1 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-200/50 flex items-center gap-1 active:scale-95"
+          style={{ color: currentTheme.textSecondary }}
+          className="p-1.5 -ml-1 rounded-xl hover:opacity-80 flex items-center gap-1 active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-xs font-semibold">Harita</span>
@@ -590,10 +605,16 @@ export const GameScreen: React.FC<GameScreenProps> = ({
 
         {/* Center Title and Chapter */}
         <div className="flex flex-col items-center">
-          <span className="text-xs font-bold text-stone-900 leading-tight">
+          <span
+            className="text-xs font-bold leading-tight"
+            style={{ color: currentTheme.textPrimary }}
+          >
             {levelConfig.title}
           </span>
-          <span className="text-[10px] text-stone-500 font-medium">
+          <span
+            className="text-[10px] font-medium"
+            style={{ color: currentTheme.textMuted }}
+          >
             {levelConfig.chapter}
           </span>
         </div>
@@ -603,7 +624,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           <button
             type="button"
             onClick={() => setIsPaused((prev) => !prev)}
-            className="p-1.5 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-200/50"
+            style={{ color: currentTheme.textSecondary }}
+            className="p-1.5 rounded-xl hover:opacity-80 active:scale-95"
             title={isPaused ? 'Devam Et' : 'Duraklat'}
           >
             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
@@ -611,8 +633,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({
           <button
             type="button"
             onClick={() => setShowSettings(true)}
-            className="p-1.5 rounded-xl text-stone-500 hover:text-stone-800 hover:bg-stone-200/50"
-            title="Ayarlar"
+            style={{ color: currentTheme.textSecondary }}
+            className="p-1.5 rounded-xl hover:opacity-80 active:scale-95"
+            title="Ayarlar & Temalar"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -620,19 +643,26 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       </header>
 
       {/* Subheader Status Strip: Time, Mistakes, and Live Hidden Picture Peek */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#FAF7F2] shrink-0">
+      <div
+        className="flex items-center justify-between px-3 py-1.5 shrink-0 transition-colors duration-200"
+        style={{ backgroundColor: currentTheme.appBg }}
+      >
         <div className="flex items-center gap-3 text-xs">
           {/* Timer */}
-          <div className="flex items-center gap-1 text-stone-600 font-semibold tabular-nums">
+          <div
+            className="flex items-center gap-1 font-semibold tabular-nums"
+            style={{ color: currentTheme.textSecondary }}
+          >
             <span>⏱️</span>
             <span>{formatTimer(elapsedSeconds)}</span>
           </div>
 
           {/* Mistakes Counter */}
           <div
-            className={`flex items-center gap-1 font-semibold tabular-nums ${
-              mistakes > 0 ? 'text-rose-600' : 'text-stone-500'
-            }`}
+            className="flex items-center gap-1 font-semibold tabular-nums"
+            style={{
+              color: mistakes > 0 ? '#E11D48' : currentTheme.textMuted,
+            }}
           >
             {levelConfig.maxMistakes ? (
               <span>
@@ -656,17 +686,31 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       {/* Main Board Arena (Centered vertically and horizontally) */}
       <main className="flex-1 flex items-center justify-center px-2 py-1 min-h-0">
         {isPaused ? (
-          <div className="w-full max-w-xs p-6 rounded-3xl bg-[#EFE9DF] border border-[#E0D7C7] text-center flex flex-col items-center">
-            <h3 className="text-lg font-bold font-display text-stone-900">
+          <div
+            className="w-full max-w-xs p-6 rounded-3xl border text-center flex flex-col items-center shadow-lg"
+            style={{
+              backgroundColor: currentTheme.cardBg,
+              borderColor: currentTheme.cardBorder,
+              color: currentTheme.textPrimary,
+            }}
+          >
+            <h3 className="text-lg font-bold font-display">
               Oyun Duraklatıldı
             </h3>
-            <p className="text-xs text-stone-500 mt-1 mb-4">
+            <p
+              className="text-xs mt-1 mb-4"
+              style={{ color: currentTheme.textMuted }}
+            >
               Hazır olduğunda devam et.
             </p>
             <button
               type="button"
               onClick={() => setIsPaused(false)}
-              className="py-2.5 px-6 rounded-xl bg-stone-900 text-white text-xs font-semibold hover:bg-stone-800"
+              style={{
+                backgroundColor: currentTheme.btnPrimaryBg,
+                color: currentTheme.btnPrimaryText,
+              }}
+              className="py-2.5 px-6 rounded-xl text-xs font-semibold hover:opacity-90 active:scale-95 shadow-md"
             >
               Devam Et
             </button>
@@ -683,6 +727,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             cellSize={cellSize}
             highlightedSymbolId={highlightedSymbolId}
             hintHighlight={hintHighlight}
+            theme={currentTheme}
           />
         )}
       </main>
@@ -704,6 +749,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
             grid[selectedCell.row]?.[selectedCell.col]?.value !== null
           }
           hintsRemaining={Math.max(0, 3 - hintsUsed)}
+          theme={currentTheme}
         />
       </footer>
 

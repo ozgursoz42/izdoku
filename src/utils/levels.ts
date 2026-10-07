@@ -1,5 +1,5 @@
 import { LevelConfig, BoardSize } from '../types/game';
-import { getStandardRegions, getIrregularRegions, generateSudokuLevel } from './sudoku';
+import { getStandardRegions, generateSudokuLevel } from './sudoku';
 import { ARTWORK_IDS } from './hiddenPictures';
 
 // Deterministic level caching so every level is consistently repeatable and loads instantly
@@ -20,8 +20,6 @@ export function getLevelConfig(levelId: number): LevelConfig {
 
   const artworkIndex = (levelId - 1) % ARTWORK_IDS.length;
   const hiddenArtId = ARTWORK_IDS[artworkIndex];
-
-  let irregularVariant: ('zigzag' | 'rings' | 'triangles' | 'asymmetric') | undefined = undefined;
 
   if (levelId <= 10) {
     // Levels 1-10: 4x4, 4 symbols

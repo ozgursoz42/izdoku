@@ -8,6 +8,7 @@ import { DailyScreen } from './components/DailyScreen';
 import { CollectionModal } from './components/CollectionModal';
 import { SettingsModal } from './components/SettingsModal';
 import { soundManager } from './utils/audio';
+import { getTheme } from './utils/theme';
 
 type Screen = 'HOME' | 'JOURNEY_MAP' | 'GAME' | 'DAILY';
 
@@ -22,6 +23,7 @@ const DEFAULT_PROGRESS: UserProgress = {
     sound: true,
     vibration: true,
     highContrast: false,
+    theme: 'sand',
   },
 };
 
@@ -39,6 +41,7 @@ export default function App() {
           settings: {
             ...DEFAULT_PROGRESS.settings,
             ...(parsed.settings || {}),
+            theme: parsed.settings?.theme || 'sand',
           },
         };
       }
@@ -53,6 +56,16 @@ export default function App() {
   const [isDailyActive, setIsDailyActive] = useState<boolean>(false);
   const [showCollection, setShowCollection] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+
+  const currentTheme = getTheme(progress.settings.theme);
+
+  // Sync background color with theme
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.backgroundColor = currentTheme.appBg;
+      document.body.style.backgroundColor = currentTheme.appBg;
+    }
+  }, [currentTheme]);
 
   // Sync with audio and localStorage
   useEffect(() => {
@@ -146,7 +159,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-stone-800 antialiased font-sans select-none overflow-x-hidden">
+    <div
+      className="min-h-screen antialiased font-sans select-none overflow-x-hidden transition-colors duration-200"
+      style={{
+        backgroundColor: currentTheme.appBg,
+        color: currentTheme.textPrimary,
+      }}
+    >
       {/* Screen Router */}
       {currentScreen === 'HOME' && (
         <HomeScreen
@@ -165,6 +184,7 @@ export default function App() {
             soundManager.playSelect();
             setShowSettings(true);
           }}
+          theme={currentTheme}
         />
       )}
 
@@ -176,6 +196,7 @@ export default function App() {
             soundManager.playSelect();
             setCurrentScreen('HOME');
           }}
+          theme={currentTheme}
         />
       )}
 
@@ -187,6 +208,7 @@ export default function App() {
             soundManager.playSelect();
             setCurrentScreen('HOME');
           }}
+          theme={currentTheme}
         />
       )}
 

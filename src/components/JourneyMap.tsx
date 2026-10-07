@@ -2,11 +2,13 @@ import React, { useRef, useEffect } from 'react';
 import { UserProgress } from '../types/game';
 import { HIDDEN_ARTWORKS } from '../utils/hiddenPictures';
 import { Lock, Star, ChevronLeft } from 'lucide-react';
+import { getTheme, ThemeDefinition } from '../utils/theme';
 
 interface JourneyMapProps {
   progress: UserProgress;
   onSelectLevel: (levelId: number) => void;
   onBack: () => void;
+  theme?: ThemeDefinition;
 }
 
 interface ChapterInfo {
@@ -40,7 +42,7 @@ const CHAPTERS: ChapterInfo[] = [
     title: 'Güneş Çayırı',
     subtitle: 'Klasik 9 sembollü mantık dengesi',
     range: [26, 50],
-    boardDesc: '9x9 Tahta · 9 Sembol',
+    boardDesc: '9x9 Tahta · 3x3 Kareler',
     badgeColor: 'bg-amber-100 text-amber-800 border-amber-200',
   },
   {
@@ -64,7 +66,7 @@ const CHAPTERS: ChapterInfo[] = [
     title: 'Usta Tapınağı',
     subtitle: 'Sınırlı hatalı derin mantık sınavı',
     range: [86, 100],
-    boardDesc: '9x9 Tahta · Uzman (3 Can)',
+    boardDesc: '9x9 Tahta · 3x3 Kareler (3 Can)',
     badgeColor: 'bg-stone-800 text-amber-300 border-stone-700',
   },
 ];
@@ -73,7 +75,9 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
   progress,
   onSelectLevel,
   onBack,
+  theme,
 }) => {
+  const currentTheme = theme || getTheme(progress.settings.theme);
   const currentUnlockedRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -87,23 +91,42 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex flex-col max-w-md mx-auto">
+    <div
+      className="min-h-screen flex flex-col max-w-md mx-auto transition-colors duration-200"
+      style={{
+        backgroundColor: currentTheme.appBg,
+        color: currentTheme.textPrimary,
+      }}
+    >
       {/* Sticky Header */}
-      <div className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E5DDD0]">
+      <div
+        className="sticky top-0 z-30 flex items-center justify-between px-4 py-3 backdrop-blur-md border-b transition-colors duration-200"
+        style={{
+          backgroundColor: currentTheme.headerBg,
+          borderColor: currentTheme.headerBorder,
+        }}
+      >
         <button
           type="button"
           onClick={onBack}
-          className="p-2 -ml-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-200/50 flex items-center gap-1"
+          style={{ color: currentTheme.textSecondary }}
+          className="p-2 -ml-2 rounded-xl hover:opacity-80 flex items-center gap-1 active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
           <span className="text-xs font-semibold">Ana Menü</span>
         </button>
 
         <div className="text-center">
-          <h1 className="text-base font-bold font-display text-stone-900">
+          <h1
+            className="text-base font-bold font-display"
+            style={{ color: currentTheme.textPrimary }}
+          >
             Bölüm Seçimi (1 - 100)
           </h1>
-          <span className="text-[10px] text-emerald-700 font-semibold">
+          <span
+            className="text-[10px] font-semibold"
+            style={{ color: currentTheme.isDark ? '#34D399' : '#059669' }}
+          >
             Tüm 100 Bölüm Açık · {Object.keys(progress.completedLevels).length} Tamamlandı
           </span>
         </div>
@@ -112,7 +135,13 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
       </div>
 
       {/* Quick Chapter Jump Filter Tabs */}
-      <div className="px-3 py-2 bg-[#FAF7F2] border-b border-[#E5DDD0] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+      <div
+        className="px-3 py-2 border-b flex items-center gap-1.5 overflow-x-auto no-scrollbar transition-colors duration-200"
+        style={{
+          backgroundColor: currentTheme.headerBg,
+          borderColor: currentTheme.headerBorder,
+        }}
+      >
         {CHAPTERS.map((c) => (
           <button
             key={c.id}
@@ -121,7 +150,12 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
               const el = document.getElementById(`chapter-${c.id}`);
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="px-2.5 py-1 rounded-xl text-[11px] font-semibold bg-[#EFE9DF] text-stone-700 hover:bg-stone-200 whitespace-nowrap shrink-0 border border-[#E0D7C7]"
+            style={{
+              backgroundColor: currentTheme.cardBg,
+              borderColor: currentTheme.cardBorder,
+              color: currentTheme.textSecondary,
+            }}
+            className="px-2.5 py-1 rounded-xl text-[11px] font-semibold hover:opacity-90 whitespace-nowrap shrink-0 border"
           >
             Bölüm {c.id} ({c.boardDesc.split(' · ')[0]})
           </button>
@@ -138,18 +172,31 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
             <div
               key={chap.id}
               id={`chapter-${chap.id}`}
-              className="p-4 rounded-3xl bg-[#EFE9DF] border border-[#E0D7C7] flex flex-col gap-3 shadow-xs"
+              style={{
+                backgroundColor: currentTheme.cardBg,
+                borderColor: currentTheme.cardBorder,
+              }}
+              className="p-4 rounded-3xl border flex flex-col gap-3 shadow-xs"
             >
               {/* Chapter Header */}
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-stone-500">
+                  <span
+                    className="text-[10px] font-bold tracking-wider uppercase"
+                    style={{ color: currentTheme.textMuted }}
+                  >
                     Bölüm {chap.id}
                   </span>
-                  <h2 className="text-base font-bold font-display text-stone-900 leading-tight">
+                  <h2
+                    className="text-base font-bold font-display leading-tight"
+                    style={{ color: currentTheme.textPrimary }}
+                  >
                     {chap.title}
                   </h2>
-                  <p className="text-[11px] text-stone-600 mt-0.5">
+                  <p
+                    className="text-[11px] mt-0.5"
+                    style={{ color: currentTheme.textSecondary }}
+                  >
                     {chap.subtitle}
                   </p>
                 </div>
@@ -173,35 +220,41 @@ export const JourneyMap: React.FC<JourneyMapProps> = ({
                       ref={isCurrent ? currentUnlockedRef : undefined}
                       type="button"
                       onClick={() => onSelectLevel(lvl)}
-                      className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all p-1 cursor-pointer active:scale-95 ${
-                        isCurrent
-                          ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-400 ring-offset-2 scale-105 z-10'
+                      style={{
+                        backgroundColor: isCurrent
+                          ? currentTheme.btnPrimaryBg
                           : isCompleted
-                          ? 'bg-[#FAF7F2] border border-[#E0D7C7] text-stone-800 hover:border-amber-400 hover:shadow-xs'
-                          : 'bg-white border border-stone-200/90 text-stone-800 hover:border-amber-400 hover:shadow-xs'
+                          ? (currentTheme.isDark ? '#1E293B' : '#FFFFFF')
+                          : currentTheme.cardBg,
+                        borderColor: isCurrent
+                          ? currentTheme.btnPrimaryBg
+                          : currentTheme.cardBorder,
+                        color: isCurrent
+                          ? currentTheme.btnPrimaryText
+                          : currentTheme.textPrimary,
+                      }}
+                      className={`relative aspect-square rounded-2xl flex flex-col items-center justify-center transition-all p-1 cursor-pointer active:scale-95 border ${
+                        isCurrent
+                          ? 'shadow-md ring-2 ring-offset-2 scale-105 z-10'
+                          : isCompleted
+                          ? 'hover:opacity-90 hover:shadow-xs'
+                          : 'opacity-80 hover:opacity-100'
                       }`}
                     >
-                      <span className="text-xs font-bold leading-none">
-                        {lvl}
-                      </span>
+                      <span className="text-xs font-bold leading-none">{lvl}</span>
 
-                      {/* Status / Star */}
-                      <div className="mt-1 flex items-center justify-center h-3">
-                        {isCompleted ? (
-                          <div className="flex items-center gap-0.5">
-                            {Array.from({ length: completedData.stars || 1 }).map((_, s) => (
-                              <Star
-                                key={s}
-                                className="w-2 h-2 text-amber-500 fill-amber-500"
-                              />
-                            ))}
-                          </div>
-                        ) : isCurrent ? (
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                        ) : (
-                          <span className="text-[8px] text-stone-400 font-medium">Oyna</span>
-                        )}
-                      </div>
+                      {/* Stars for completed levels */}
+                      {isCompleted && (
+                        <div className="flex items-center gap-0.5 mt-1">
+                          <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                          <span
+                            className="text-[9px] font-semibold"
+                            style={{ color: currentTheme.textMuted }}
+                          >
+                            {completedData.stars}
+                          </span>
+                        </div>
+                      )}
                     </button>
                   );
                 })}

@@ -8,10 +8,13 @@
 
   body {
     font-family: var(--font-body);
+    background-color: var(--theme-bg-app, #FAF7F2);
+    color: var(--theme-text-primary, #1C1917);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   h1, h2, h3, h4, .font-display {
